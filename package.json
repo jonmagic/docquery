@@ -1,0 +1,25 @@
+{
+  "name": "docquery",
+  "version": "1.0.0",
+  "description": "Document query interface for plaintext documents stored in directories on a filesystem",
+  "main": "src/docquery.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jonmagic/docquery.git"
+  },
+  "keywords": [
+    "document",
+    "query",
+    "index",
+    "search",
+    "filesystem",
+    "directory",
+    "plaintext",
+    "markdown"
+  ],
+  "author": "Jonathan Hoyt",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jonmagic/docquery/issues"
+  }
+}
