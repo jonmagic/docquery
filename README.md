@@ -48,6 +48,23 @@ Return file paths only from the search results with [`jq`](http://stedolan.githu
 "/Users/jonmagic/Projects/docquery/test/fixtures/top-5/movies.md"
 ```
 
+## Development
+
+```bash
+~/Projects/docquery $ npm test
+> docquery@1.0.0 test /Users/jonmagic/Projects/docquery
+> mocha --compilers js:mocha-traceur test/*_test.js
+
+
+
+  Array
+    #indexOf()
+      ✓ should return -1 when the value is not present
+
+
+  1 passing (8ms)
+```
+
 ## License
 
 The MIT License (MIT)
