@@ -11,6 +11,28 @@ Document query interface for plaintext documents stored in directories on a file
 
 ## Usage
 
+### Library
+
+```js
+> var dq = new docquery("~/Projects/docquery/test/fixtures", {recursive: true})
+docquery {}
+
+> dq.search("star")
+[{"filePath":"/Users/jonmagic/Projects/docquery/test/fixtures/top-5/movies.md","fileName":"movies.md","snippet":"# Top 5 Movies","lineMatches":["* [Star Wars IV-VI](http://en.wikipedia.org/wiki/Star_Wars)"],"modifiedAtEpoch":1431710896,"modifiedAt":"2015-05-15T17:28:25.250Z"}]
+
+> dq.all()
+// [...returns list of all documents]
+
+> dq.allSort = function(a, b) {
+  if(a.modifiedAtEpoch < b.modifiedAtEpoch) { return -1 }
+  if(a.modifiedAtEpoch > b.modifiedAtEpoch) { return 1 }
+  return 0
+  }
+// override default sort for all documents list
+```
+
+### Command Line
+
 Here's an example directory structure with some markdown documents in it.
 
 ```bash
