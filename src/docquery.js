@@ -1,4 +1,4 @@
-class docquery {
+class DocQuery {
   constructor(directoryPath) {
     this.directoryPath = directoryPath
   }
@@ -8,4 +8,4 @@ class docquery {
   }
 }
 
-module.exports = docquery
+module.exports = DocQuery

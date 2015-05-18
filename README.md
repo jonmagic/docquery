@@ -1,4 +1,4 @@
-# docquery
+# DocQuery
 
 Document query interface for plaintext documents stored in directories on a filesystem.
 
@@ -14,8 +14,8 @@ Document query interface for plaintext documents stored in directories on a file
 ### Library
 
 ```js
-> var dq = new docquery("~/Projects/docquery/test/fixtures", {recursive: true})
-docquery {}
+> var dq = new DocQuery("~/Projects/docquery/test/fixtures", {recursive: true})
+DocQuery {}
 
 > dq.search("star")
 [{"filePath":"/Users/jonmagic/Projects/docquery/test/fixtures/top-5/movies.md","fileName":"movies.md","snippet":"# Top 5 Movies","lineMatches":["* [Star Wars IV-VI](http://en.wikipedia.org/wiki/Star_Wars)"],"modifiedAtEpoch":1431710896,"modifiedAt":"2015-05-15T17:28:25.250Z"}]

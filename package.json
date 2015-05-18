@@ -2,7 +2,7 @@
   "name": "docquery",
   "version": "1.0.0",
   "description": "Document query interface for plaintext documents stored in directories on a filesystem",
-  "main": "src/docquery.js",
+  "main": "src/DocQuery.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/jonmagic/docquery.git"
