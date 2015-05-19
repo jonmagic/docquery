@@ -18,7 +18,7 @@ Document query interface for plaintext documents stored in directories on a file
 DocQuery {}
 
 > dq.search("star")
-[{"filePath":"/Users/jonmagic/Projects/docquery/test/fixtures/top-5/movies.md","fileName":"movies.md","snippet":"# Top 5 Movies","lineMatches":["* [Star Wars IV-VI](http://en.wikipedia.org/wiki/Star_Wars)"],"modifiedAtEpoch":1431710896,"modifiedAt":"2015-05-15T17:28:25.250Z"}]
+[{"filePath": "/Users/jonmagic/Projects/docquery/test/fixtures/top-5/movies.md",  "fileName": "movies.md",  "title": "movies",  "modifiedAt": "2015-05-15T17:28:25.250Z",  "body": "..."}]
 
 > dq.all()
 // [...returns list of all documents]
@@ -55,10 +55,9 @@ Use the docquery command line tool `dq` to query those documents and get back js
   {
     "filePath": "/Users/jonmagic/Projects/docquery/test/fixtures/top-5/movies.md",
     "fileName": "movies.md",
-    "snippet": "# Top 5 Movies",
-    "lineMatches": ["* [Star Wars IV-VI](http://en.wikipedia.org/wiki/Star_Wars)"],
-    "modifiedAtEpoch": 1431710896,
-    "modifiedAt": "2015-05-15T17:28:25.250Z"
+    "title": "movies",
+    "modifiedAt": "2015-05-15T17:28:25.250Z",
+    "body": "..."
   }
 ]
 ```
