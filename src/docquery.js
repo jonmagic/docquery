@@ -1,6 +1,7 @@
 let fs = require("fs")
 let tilde = require("tilde-expansion")
 let path = require("path")
+let lunr = require("lunr")
 
 class DocQuery {
   constructor(directoryPath, options) {
@@ -8,6 +9,10 @@ class DocQuery {
     this.extensions = [".md"]
     this.directoryPath = directoryPath
     this._documents = {}
+    this.searchIndex = lunr(function() {
+      this.field("title", { boost: 10 })
+      this.field("body")
+    })
     this.loadDocuments(directoryPath)
   }
 
@@ -24,22 +29,33 @@ class DocQuery {
         if(stats.isDirectory() && self.options.recursive) {
           self.loadDocuments(filePath)
         }else if(self.extensions.find(x => x == extension)) {
+          var title = fileName.replace(new RegExp(`${extension}$`), "")
+          var body = fs.readFileSync(filePath, {encoding: "utf8"})
+
           self._documents[filePath] = {
             filePath: filePath,
             fileName: fileName,
-            title: fileName.replace(new RegExp(`${extension}$`), ""),
+            title: title,
             modifiedAt: stats.mtime,
-            body: fs.readFileSync(filePath, {encoding: "utf8"})
+            body: body
           }
+
+          self.searchIndex.add({
+            id: filePath,
+            title: title,
+            body: body
+          })
         }
       }
     })
   }
 
   search(query) {
-    var result = this._documents["/Users/jonmagic/Projects/docquery/test/fixtures/top-5/movies.md"]
+    var self = this
 
-    return [result]
+    return self.searchIndex.search(query).map((result)=>{
+      return self._documents[result.ref]
+    })
   }
 
   get documents() {
