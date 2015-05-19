@@ -17,8 +17,6 @@ class DocQuery {
   }
 
   loadDocuments(directoryPath) {
-    var self = this
-
     tilde(directoryPath, (expandedPath)=>{
       var fileNames = fs.readdirSync(expandedPath)
       for(let fileName of fileNames) {
@@ -26,13 +24,13 @@ class DocQuery {
         var filePath = `${expandedPath}/${fileName}`
         var stats = fs.statSync(filePath)
 
-        if(stats.isDirectory() && self.options.recursive) {
-          self.loadDocuments(filePath)
-        }else if(self.extensions.find(x => x == extension)) {
+        if(stats.isDirectory() && this.options.recursive) {
+          this.loadDocuments(filePath)
+        }else if(this.extensions.find(x => x == extension)) {
           var title = fileName.replace(new RegExp(`${extension}$`), "")
           var body = fs.readFileSync(filePath, {encoding: "utf8"})
 
-          self._documents[filePath] = {
+          this._documents[filePath] = {
             filePath: filePath,
             fileName: fileName,
             title: title,
@@ -40,7 +38,7 @@ class DocQuery {
             body: body
           }
 
-          self.searchIndex.add({
+          this.searchIndex.add({
             id: filePath,
             title: title,
             body: body
@@ -51,10 +49,8 @@ class DocQuery {
   }
 
   search(query) {
-    var self = this
-
-    return self.searchIndex.search(query).map((result)=>{
-      return self._documents[result.ref]
+    return this.searchIndex.search(query).map((result)=>{
+      return this._documents[result.ref]
     })
   }
 
