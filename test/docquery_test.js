@@ -107,5 +107,17 @@ describe("DocQuery", ()=>{
         })
       })
     })
+
+    it("ignores files in subfolders when recursive is false", (done)=>{
+      var dqNR = new DocQuery("~/Projects/docquery/test/fixtures", {recursive: false})
+      delay(()=>{
+        assert.equal(2, dqNR.documents.length)
+        fs.writeFileSync(tempSubDirFilePath, "hello world")
+        delay(()=>{
+          assert.equal(2, dqNR.documents.length)
+          done()
+        })
+      })
+    })
   })
 })
