@@ -2,6 +2,7 @@ let fs = require("fs")
 let tilde = require("tilde-expansion")
 let path = require("path")
 let lunr = require("lunr")
+let chokidar = require("chokidar")
 
 class DocQuery {
   constructor(directoryPath, options) {
@@ -13,38 +14,64 @@ class DocQuery {
       this.field("title", { boost: 10 })
       this.field("body")
     })
-    this.loadDocuments(directoryPath)
+
+    var watchDepth = this.options.recursive ? undefined : 0
+    this.watcher = chokidar.watch(null, {depth: watchDepth})
+    var isExtensionValid = (filePath)=>{
+      return this.extensions.find(x => x == path.extname(filePath)) ? true : false
+    }
+    var fileDetails = (filePath)=>{
+      var fileStats = fs.statSync(filePath)
+      var fileName = path.basename(filePath)
+      var title = path.basename(fileName, path.extname(fileName))
+      var body = fs.readFileSync(filePath, {encoding: "utf8"})
+
+      return {
+        filePath: filePath,
+        fileName: fileName,
+        title: title,
+        modifiedAt: fileStats.mtime,
+        body: body
+      }
+    }
+    this.watcher.on("add", (filePath)=>{
+      if(isExtensionValid(filePath)) this.addDocument(fileDetails(filePath))
+    })
+    this.watcher.on("change", (filePath)=>{
+      if(isExtensionValid(filePath)) this.updateDocument(fileDetails(filePath))
+    })
+    this.watcher.on("unlink", (filePath)=>{
+      if(isExtensionValid(filePath)) this.removeDocument(this._documents[filePath])
+    })
+    tilde(this.directoryPath, (expandedDirectoryPath)=>{
+      this.watcher.add(expandedDirectoryPath)
+    })
   }
 
-  loadDocuments(directoryPath) {
-    tilde(directoryPath, (expandedPath)=>{
-      var fileNames = fs.readdirSync(expandedPath)
-      for(let fileName of fileNames) {
-        var extension = path.extname(fileName)
-        var filePath = `${expandedPath}/${fileName}`
-        var stats = fs.statSync(filePath)
+  addDocument(fileDetails) {
+    this._documents[fileDetails.filePath] = fileDetails
+    this.searchIndex.add({
+      id: fileDetails.filePath,
+      title: fileDetails.title,
+      body: fileDetails.body
+    })
+  }
 
-        if(stats.isDirectory() && this.options.recursive) {
-          this.loadDocuments(filePath)
-        }else if(this.extensions.find(x => x == extension)) {
-          var title = fileName.replace(new RegExp(`${extension}$`), "")
-          var body = fs.readFileSync(filePath, {encoding: "utf8"})
+  updateDocument(fileDetails) {
+    this._documents[fileDetails.filePath] = fileDetails
+    this.searchIndex.update({
+      id: fileDetails.filePath,
+      title: fileDetails.title,
+      body: fileDetails.body
+    })
+  }
 
-          this._documents[filePath] = {
-            filePath: filePath,
-            fileName: fileName,
-            title: title,
-            modifiedAt: stats.mtime,
-            body: body
-          }
-
-          this.searchIndex.add({
-            id: filePath,
-            title: title,
-            body: body
-          })
-        }
-      }
+  removeDocument(fileDetails) {
+    delete this._documents[fileDetails.filePath]
+    this.searchIndex.remove({
+      id: fileDetails.filePath,
+      title: fileDetails.title,
+      body: fileDetails.body
     })
   }
 

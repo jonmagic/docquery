@@ -20,10 +20,10 @@ DocQuery {}
 > dq.search("star")
 [{"filePath": "/Users/jonmagic/Projects/docquery/test/fixtures/top-5/movies.md",  "fileName": "movies.md",  "title": "movies",  "modifiedAt": "2015-05-15T17:28:25.250Z",  "body": "..."}]
 
-> dq.all()
+> dq.documents
 // [...returns list of all documents]
 
-> dq.allSort = function(a, b) {
+> dq.defaultSort = function(a, b) {
   if(a.modifiedAtEpoch < b.modifiedAtEpoch) { return -1 }
   if(a.modifiedAtEpoch > b.modifiedAtEpoch) { return 1 }
   return 0
