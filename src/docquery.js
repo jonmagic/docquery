@@ -16,10 +16,14 @@ class DocQuery {
     })
 
     var watchDepth = this.options.recursive ? undefined : 0
-    this.watcher = chokidar.watch(null, {depth: watchDepth})
-    var isExtensionValid = (filePath)=>{
-      return this.extensions.find(x => x == path.extname(filePath)) ? true : false
-    }
+    this.watcher = chokidar.watch(null, {
+      depth: watchDepth,
+      ignored: (watchedPath, fileStats)=>{
+        if(!fileStats) return false
+        if(fileStats.isDirectory()) return false
+        return !(this.extensions.indexOf(path.extname(watchedPath)) > -1)
+      }
+    })
     var fileDetails = (filePath)=>{
       var fileStats = fs.statSync(filePath)
       var fileName = path.basename(filePath)
@@ -35,13 +39,13 @@ class DocQuery {
       }
     }
     this.watcher.on("add", (filePath)=>{
-      if(isExtensionValid(filePath)) this.addDocument(fileDetails(filePath))
+      this.addDocument(fileDetails(filePath))
     })
     this.watcher.on("change", (filePath)=>{
-      if(isExtensionValid(filePath)) this.updateDocument(fileDetails(filePath))
+      this.updateDocument(fileDetails(filePath))
     })
     this.watcher.on("unlink", (filePath)=>{
-      if(isExtensionValid(filePath)) this.removeDocument(this._documents[filePath])
+      this.removeDocument(this._documents[filePath])
     })
     tilde(this.directoryPath, (expandedDirectoryPath)=>{
       this.watcher.add(expandedDirectoryPath)
