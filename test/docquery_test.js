@@ -1,6 +1,6 @@
 let assert = require("assert")
 let touch = require("touch")
-let DocQuery = require("../src/DocQuery")
+let DocQuery = require("../lib/DocQuery")
 let fs = require("fs")
 let delay = function(fn) {
   setTimeout(fn, 205)
