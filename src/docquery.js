@@ -7,7 +7,7 @@ let chokidar = require("chokidar")
 class DocQuery {
   constructor(directoryPath, options) {
     this.options = options || {}
-    this.extensions = this.options.extensions || [".md"]
+    this.extensions = this.options.extensions || [".md", ".txt"]
     this.directoryPath = directoryPath
     this._documents = {}
     this.searchIndex = lunr(function() {
