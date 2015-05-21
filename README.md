@@ -50,7 +50,7 @@ test/fixtures
 Use the docquery command line tool `dq` to query those documents and get back json results.
 
 ```bash
-~/Projects/docquery $ dq -r test/fixtures star
+~/Projects/docquery $ dq -r -p test/fixtures star
 [
   {
     "filePath": "/Users/jonmagic/Projects/docquery/test/fixtures/top-5/movies.md",
@@ -62,11 +62,30 @@ Use the docquery command line tool `dq` to query those documents and get back js
 ]
 ```
 
+`dq` takes a number of options.
+
+```bash
+~/Projects/docquery $ dq
+Usage: dq [options] query
+  -r, --recursive Search path including sub directories
+  -p, --path PATH Path to search
+```
+
 Return file paths only from the search results with [`jq`](http://stedolan.github.io/jq/).
 
 ```bash
 ~/Projects/docquery $ dq -r test/fixtures star | jq .[].filePath
 "/Users/jonmagic/Projects/docquery/test/fixtures/top-5/movies.md"
+```
+
+Set default options by creating a `~/.dq` file that looks like this:
+
+```json
+{
+  "recursive": false,
+  "searchPath": "~/Notes",
+  "includeBody": false
+}
 ```
 
 ## Development
