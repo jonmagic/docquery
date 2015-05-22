@@ -21,14 +21,7 @@ DocQuery {}
 [{"filePath": "/Users/jonmagic/Projects/docquery/test/fixtures/top-5/movies.md",  "fileName": "movies.md",  "title": "movies",  "modifiedAt": "2015-05-15T17:28:25.250Z",  "body": "..."}]
 
 > dq.documents
-// [...returns list of all documents]
-
-> dq.defaultSort = function(a, b) {
-  if(a.modifiedAtEpoch < b.modifiedAtEpoch) { return -1 }
-  if(a.modifiedAtEpoch > b.modifiedAtEpoch) { return 1 }
-  return 0
-  }
-// override default sort for all documents list
+// [...returns list of all documents sorted newest to oldest]
 ```
 
 ### Command Line
@@ -65,7 +58,7 @@ Use the docquery command line tool `dq` to query those documents and get back js
 `dq` takes a number of options.
 
 ```bash
-~/Projects/docquery $ dq
+~/Projects/docquery $ dq -h
 Usage: dq [options] query
 
 Options:
@@ -96,17 +89,28 @@ Set default options by creating a `~/.dq` file that looks like this:
 
 ```bash
 ~/Projects/docquery $ npm test
+
 > docquery@1.0.0 test /Users/jonmagic/Projects/docquery
-> mocha --compilers js:mocha-traceur test/*_test.js
+> babel src --out-dir lib; mocha --compilers js:mocha-traceur test/*_test.js
+
+src/cli.js -> lib/cli.js
+src/docquery.js -> lib/docquery.js
 
 
+  DocQuery
+    #search
+      ✓ returns search result for query (214ms)
+      ✓ returns new documents in search results (418ms)
+      ✓ does not return document in search results after it has been deleted (626ms)
+    #documents
+      ✓ returns all documents (209ms)
+      ✓ returns documents sorted newest first (210ms)
+      ✓ returns new documents as they are added (414ms)
+      ✓ does not return document after it has been deleted (625ms)
+      ✓ ignores files in subfolders when recursive is false (419ms)
 
-  Array
-    #indexOf()
-      ✓ should return -1 when the value is not present
 
-
-  1 passing (8ms)
+  8 passing (3s)
 ```
 
 ## License
