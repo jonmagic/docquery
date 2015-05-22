@@ -1,4 +1,4 @@
-# docquery
+# DocQuery
 
 Document query interface for plaintext documents stored in directories on a filesystem.
 
@@ -10,6 +10,28 @@ Document query interface for plaintext documents stored in directories on a file
 ```
 
 ## Usage
+
+### Library
+
+```js
+> var dq = new DocQuery("~/Projects/docquery/test/fixtures", {recursive: true})
+DocQuery {}
+
+> dq.search("star")
+[{"filePath": "/Users/jonmagic/Projects/docquery/test/fixtures/top-5/movies.md",  "fileName": "movies.md",  "title": "movies",  "modifiedAt": "2015-05-15T17:28:25.250Z",  "body": "..."}]
+
+> dq.documents
+// [...returns list of all documents]
+
+> dq.defaultSort = function(a, b) {
+  if(a.modifiedAtEpoch < b.modifiedAtEpoch) { return -1 }
+  if(a.modifiedAtEpoch > b.modifiedAtEpoch) { return 1 }
+  return 0
+  }
+// override default sort for all documents list
+```
+
+### Command Line
 
 Here's an example directory structure with some markdown documents in it.
 
@@ -28,24 +50,46 @@ test/fixtures
 Use the docquery command line tool `dq` to query those documents and get back json results.
 
 ```bash
-~/Projects/docquery $ dq -r test/fixtures star
+~/Projects/docquery $ dq -r -p test/fixtures star
 [
   {
     "filePath": "/Users/jonmagic/Projects/docquery/test/fixtures/top-5/movies.md",
     "fileName": "movies.md",
-    "snippet": "# Top 5 Movies",
-    "lineMatches": ["* [Star Wars IV-VI](http://en.wikipedia.org/wiki/Star_Wars)"],
-    "modifiedAtEpoch": 1431710896,
-    "modifiedAt": "2015-05-15T17:28:25.250Z"
+    "title": "movies",
+    "modifiedAt": "2015-05-15T17:28:25.250Z",
+    "body": "..."
   }
 ]
+```
+
+`dq` takes a number of options.
+
+```bash
+~/Projects/docquery $ dq
+Usage: dq [options] query
+
+Options:
+  -p, --path <path>    Path to search
+  -r, --recursive      Search sub directories
+  -b, --body           Include document body in search result
+  -h, --help           Show dq help
 ```
 
 Return file paths only from the search results with [`jq`](http://stedolan.github.io/jq/).
 
 ```bash
-~/Projects/docquery $ dq -r test/fixtures star | jq .[].filePath
+~/Projects/docquery $ dq -rp test/fixtures star | jq .[].filePath
 "/Users/jonmagic/Projects/docquery/test/fixtures/top-5/movies.md"
+```
+
+Set default options by creating a `~/.dq` file that looks like this:
+
+```json
+{
+  "recursive": false,
+  "searchPath": "~/Notes",
+  "includeBody": false
+}
 ```
 
 ## Development

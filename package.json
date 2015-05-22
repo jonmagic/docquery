@@ -2,13 +2,13 @@
   "name": "docquery",
   "version": "1.0.0",
   "description": "Document query interface for plaintext documents stored in directories on a filesystem",
-  "main": "src/docquery.js",
+  "main": "lib/DocQuery.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/jonmagic/docquery.git"
   },
   "scripts": {
-    "test": "mocha --compilers js:mocha-traceur test/*_test.js"
+    "test": "babel src --out-dir lib; mocha --compilers js:mocha-traceur test/*_test.js"
   },
   "keywords": [
     "document",
@@ -25,10 +25,22 @@
   "bugs": {
     "url": "https://github.com/jonmagic/docquery/issues"
   },
+  "preferGlobal": true,
+  "bin": {
+    "dq": "lib/cli.js"
+  },
   "devDependencies": {
+    "babel": "^5.4.5",
     "mocha": "^2.2.5",
     "mocha-sinon": "^1.1.4",
     "mocha-traceur": "^2.1.0",
+    "touch": "0.0.3",
     "traceur": "0.0.89"
+  },
+  "dependencies": {
+    "chokidar": "^1.0.1",
+    "lunr": "^0.5.9",
+    "minimist": "^1.1.1",
+    "tilde-expansion": "0.0.0"
   }
 }
