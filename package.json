@@ -25,6 +25,10 @@
   "bugs": {
     "url": "https://github.com/jonmagic/docquery/issues"
   },
+  "preferGlobal": true,
+  "bin": {
+    "dq": "lib/cli.js"
+  },
   "devDependencies": {
     "babel": "^5.4.5",
     "mocha": "^2.2.5",
@@ -36,6 +40,7 @@
   "dependencies": {
     "chokidar": "^1.0.1",
     "lunr": "^0.5.9",
+    "minimist": "^1.1.1",
     "tilde-expansion": "0.0.0"
   }
 }

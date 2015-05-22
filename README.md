@@ -67,14 +67,18 @@ Use the docquery command line tool `dq` to query those documents and get back js
 ```bash
 ~/Projects/docquery $ dq
 Usage: dq [options] query
-  -r, --recursive Search path including sub directories
-  -p, --path PATH Path to search
+
+Options:
+  -p, --path <path>    Path to search
+  -r, --recursive      Search sub directories
+  -b, --body           Include document body in search result
+  -h, --help           Show dq help
 ```
 
 Return file paths only from the search results with [`jq`](http://stedolan.github.io/jq/).
 
 ```bash
-~/Projects/docquery $ dq -r test/fixtures star | jq .[].filePath
+~/Projects/docquery $ dq -rp test/fixtures star | jq .[].filePath
 "/Users/jonmagic/Projects/docquery/test/fixtures/top-5/movies.md"
 ```
 

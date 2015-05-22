@@ -5,23 +5,23 @@ let lunr = require("lunr")
 let chokidar = require("chokidar")
 
 class DocQuery {
-  constructor(directoryPath, options) {
+  constructor(directoryPath, options={}) {
     this.options = options || {}
-    this.extensions = this.options.extensions || [".md", ".txt"]
-    this.directoryPath = directoryPath
+    this.options.extensions  = options.extensions || [".md", ".txt"]
+    this.options.persistent  = options.persistent == false ? false : true
+    this.options.includeBody = options.includeBody == false ? false : true
     this._documents = {}
     this.searchIndex = lunr(function() {
       this.field("title", { boost: 10 })
       this.field("body")
     })
-
-    var watchDepth = this.options.recursive ? undefined : 0
     this.watcher = chokidar.watch(null, {
-      depth: watchDepth,
+      depth: this.options.recursive ? undefined : 0,
+      persistent: this.options.persistent,
       ignored: (watchedPath, fileStats)=>{
         if(!fileStats) return false
         if(fileStats.isDirectory()) return false
-        return !(this.extensions.indexOf(path.extname(watchedPath)) > -1)
+        return !(this.options.extensions.indexOf(path.extname(watchedPath)) > -1)
       }
     })
     var fileDetails = (filePath)=>{
@@ -47,7 +47,7 @@ class DocQuery {
     this.watcher.on("unlink", (filePath)=>{
       this.removeDocument(this._documents[filePath])
     })
-    tilde(this.directoryPath, (expandedDirectoryPath)=>{
+    tilde(directoryPath, (expandedDirectoryPath)=>{
       this.watcher.add(expandedDirectoryPath)
     })
   }
@@ -81,15 +81,29 @@ class DocQuery {
 
   search(query) {
     return this.searchIndex.search(query).map((result)=>{
-      return this._documents[result.ref]
+      return this.filterBody(this._documents[result.ref])
     })
+  }
+
+  filterBody(doc) {
+    var filteredDoc = {}
+    for(let key in doc) {
+      if(key != "body") {
+        filteredDoc[key] = doc[key]
+      }else if(this.options.includeBody){
+        filteredDoc[key] = doc[key]
+      }
+    }
+    return filteredDoc
   }
 
   get documents() {
     var documents = []
+
     for(let key in this._documents) {
-      documents.push(this._documents[key])
+      documents.push(this.filterBody(this._documents[key]))
     }
+
     return documents.sort((a, b)=>{
       if(a.modifiedAt < b.modifiedAt) return 1
       if(a.modifiedAt > b.modifiedAt) return -1
