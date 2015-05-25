@@ -3,9 +3,11 @@ let tilde = require("tilde-expansion")
 let path = require("path")
 let lunr = require("lunr")
 let chokidar = require("chokidar")
+let {EventEmitter} = require("events")
 
-class DocQuery {
+class DocQuery extends EventEmitter {
   constructor(directoryPath, options={}) {
+    super()
     this.options = options || {}
     this.options.extensions  = options.extensions || [".md", ".txt"]
     this.options.persistent  = options.persistent == false ? false : true
@@ -47,6 +49,9 @@ class DocQuery {
     this.watcher.on("unlink", (filePath)=>{
       this.removeDocument(this._documents[filePath])
     })
+    this.watcher.on("ready", ()=>{
+      this.emit("ready")
+    })
     tilde(directoryPath, (expandedDirectoryPath)=>{
       this.watcher.add(expandedDirectoryPath)
     })
@@ -59,6 +64,7 @@ class DocQuery {
       title: fileDetails.title,
       body: fileDetails.body
     })
+    this.emit("added", fileDetails)
   }
 
   updateDocument(fileDetails) {
@@ -68,6 +74,7 @@ class DocQuery {
       title: fileDetails.title,
       body: fileDetails.body
     })
+    this.emit("updated", fileDetails)
   }
 
   removeDocument(fileDetails) {
@@ -77,6 +84,7 @@ class DocQuery {
       title: fileDetails.title,
       body: fileDetails.body
     })
+    this.emit("removed", fileDetails)
   }
 
   search(query) {

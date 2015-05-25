@@ -10,18 +10,24 @@ let delay = function(fn) {
 touch.sync(`${__dirname}/fixtures/top-5/movies.md`)
 
 describe("DocQuery", ()=>{
-  var dq = new DocQuery("~/Projects/docquery/test/fixtures", {recursive: true})
+  var dq
   var tempFilePath = `${__dirname}/fixtures/tempfile.md`
   var tempSubDirFilePath = `${__dirname}/fixtures/top-5/foo.md`
+
+  beforeEach(()=>{
+    dq = new DocQuery("~/Projects/docquery/test/fixtures", {recursive: true})
+  })
 
   afterEach(()=>{
     if(fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath)
     if(fs.existsSync(tempSubDirFilePath)) fs.unlinkSync(tempSubDirFilePath)
+    dq.watcher.close()
+    dq = null
   })
 
   describe("#search", ()=>{
     it("returns search result for query", (done)=>{
-      delay(()=>{
+      dq.on("ready", function() {
         var docs = dq.search("star")
         assert.equal(1, docs.length)
         var doc = docs[0]
@@ -35,9 +41,8 @@ describe("DocQuery", ()=>{
     })
 
     it("returns new documents in search results", (done)=>{
-      delay(()=>{
-        fs.writeFileSync(tempFilePath, "temp file")
-        delay(()=>{
+      dq.on("ready", function() {
+        dq.on("added", function(fileDetails) {
           var docs = dq.search("temp")
           assert.equal(1, docs.length)
           var doc = docs[0]
@@ -48,69 +53,70 @@ describe("DocQuery", ()=>{
           assert.equal("temp file", doc.body)
           done()
         })
+        fs.writeFileSync(tempFilePath, "temp file")
       })
     })
 
     it("does not return document in search results after it has been deleted", (done)=>{
-      delay(()=>{
+      dq.on("ready", function() {
         assert.equal(0, dq.search("temp").length)
-        fs.writeFileSync(tempFilePath, "hello world")
-        delay(()=>{
+        dq.on("added", function(fileDetails) {
           assert.equal(1, dq.search("temp").length)
-          fs.unlinkSync(tempFilePath)
-          delay(()=>{
+          dq.on("removed", function(fileDetails) {
             assert.equal(0, dq.search("temp").length)
             done()
           })
+          fs.unlinkSync(tempFilePath)
         })
+        fs.writeFileSync(tempFilePath, "hello world")
       })
     })
   })
 
   describe("#documents", ()=>{
     it("returns all documents", (done)=>{
-      delay(()=>{
+      dq.on("ready", function() {
         assert.equal(4, dq.documents.length)
         done()
       })
     })
 
     it("returns documents sorted newest first", (done)=>{
-      delay(()=>{
+      dq.on("ready", function() {
         assert.equal(true, dq.documents[0].modifiedAt > dq.documents[3].modifiedAt)
         done()
       })
     })
 
     it("returns new documents as they are added", (done)=>{
-      delay(()=>{
-        fs.writeFileSync(tempFilePath, "hello world")
-        delay(()=>{
+      dq.on("ready", function() {
+        assert.equal(4, dq.documents.length)
+        dq.on("added", function(fileDetails) {
           assert.equal(5, dq.documents.length)
-          assert.equal("tempfile", dq.documents[0].title)
           done()
         })
+        fs.writeFileSync(tempFilePath, "hello world")
       })
     })
 
     it("does not return document after it has been deleted", (done)=>{
-      delay(()=>{
+      dq.on("ready", function() {
         assert.equal("movies", dq.documents[0].title)
-        fs.writeFileSync(tempFilePath, "hello world")
-        delay(()=>{
+        dq.on("added", function(fileDetails) {
           assert.equal("tempfile", dq.documents[0].title)
-          fs.unlinkSync(tempFilePath)
-          delay(()=>{
+          dq.on("removed", function(fileDetails) {
             assert.equal("movies", dq.documents[0].title)
             done()
           })
+          fs.unlinkSync(tempFilePath)
         })
+        fs.writeFileSync(tempFilePath, "hello world")
       })
     })
 
     it("ignores files in subfolders when recursive is false", (done)=>{
       var dqNR = new DocQuery("~/Projects/docquery/test/fixtures", {recursive: false})
-      delay(()=>{
+      dqNR.on("ready", function() {
         assert.equal(2, dqNR.documents.length)
         fs.writeFileSync(tempSubDirFilePath, "hello world")
         delay(()=>{

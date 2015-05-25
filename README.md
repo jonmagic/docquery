@@ -22,6 +22,11 @@ DocQuery {}
 
 > dq.documents
 // [...returns list of all documents sorted newest to oldest]
+
+> dq.on("ready", function() { console.log("fires when documents are finished loading") })
+> dq.on("added", function(fileDetails) { console.log("fires when a document is added") })
+> dq.on("updated", function(fileDetails) { console.log("fires when a document is updated") })
+> dq.on("removed", function(fileDetails) { console.log("fires when a document is removed") })
 ```
 
 ### Command Line
