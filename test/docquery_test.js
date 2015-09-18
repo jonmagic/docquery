@@ -102,8 +102,10 @@ describe("DocQuery", ()=>{
     it("does not return document after it has been deleted", (done)=>{
       dq.on("ready", function() {
         assert.equal("movies", dq.documents[0].title)
+        done()
         dq.on("added", function(fileDetails) {
           assert.equal("tempfile", dq.documents[0].title)
+          done()
           dq.on("removed", function(fileDetails) {
             assert.equal("movies", dq.documents[0].title)
             done()
