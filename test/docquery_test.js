@@ -15,7 +15,7 @@ describe("DocQuery", ()=>{
   var tempSubDirFilePath = `${__dirname}/fixtures/top-5/foo.md`
 
   beforeEach(()=>{
-    dq = new DocQuery("~/Projects/docquery/test/fixtures", {recursive: true})
+    dq = new DocQuery(`${__dirname}/fixtures`, {recursive: true})
   })
 
   afterEach(()=>{
@@ -31,7 +31,7 @@ describe("DocQuery", ()=>{
         var docs = dq.search("star")
         assert.equal(1, docs.length)
         var doc = docs[0]
-        assert.equal("/Users/jonmagic/Projects/docquery/test/fixtures/top-5/movies.md", doc.filePath)
+        assert.equal(`${__dirname}/fixtures/top-5/movies.md`, doc.filePath)
         assert.equal("movies.md", doc.fileName)
         assert.equal("movies", doc.title)
         assert.equal("Date", doc.modifiedAt.constructor.name)
@@ -46,7 +46,7 @@ describe("DocQuery", ()=>{
           var docs = dq.search("temp")
           assert.equal(1, docs.length)
           var doc = docs[0]
-          assert.equal("/Users/jonmagic/Projects/docquery/test/fixtures/tempfile.md", doc.filePath)
+          assert.equal(`${__dirname}/fixtures/tempfile.md`, doc.filePath)
           assert.equal("tempfile.md", doc.fileName)
           assert.equal("tempfile", doc.title)
           assert.equal("Date", doc.modifiedAt.constructor.name)
@@ -115,7 +115,7 @@ describe("DocQuery", ()=>{
     })
 
     it("ignores files in subfolders when recursive is false", (done)=>{
-      var dqNR = new DocQuery("~/Projects/docquery/test/fixtures", {recursive: false})
+      var dqNR = new DocQuery(`${__dirname}/fixtures`, {recursive: false})
       dqNR.on("ready", function() {
         assert.equal(2, dqNR.documents.length)
         fs.writeFileSync(tempSubDirFilePath, "hello world")
