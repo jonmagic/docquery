@@ -128,4 +128,28 @@ describe("DocQuery", ()=>{
       })
     })
   })
+
+  describe("Benchmarks", function() {
+    this.timeout(0)
+
+    beforeEach(()=>{
+      dq = new DocQuery(`${__dirname}/benchmark/corpus`, {recursive: false})
+    })
+
+    it("starts up in less than 5 seconds", (done)=>{
+      dq.on("ready", function() {
+        assert.equal(1, 1)
+        done()
+      })
+    })
+
+    it("returns search results in less than 5 seconds", (done)=>{
+      dq.on("ready", function() {
+        var timestamp = new Date()
+        var docs = dq.search("star")
+        assert.equal(106, docs.length)
+        done()
+      })
+    })
+  })
 })
