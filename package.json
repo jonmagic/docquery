@@ -39,7 +39,8 @@
   },
   "dependencies": {
     "chokidar": "^1.0.1",
-    "lunr": "^0.5.9",
+    "search-index": "^0.6.11",
+    "synchronize": "^0.9.14",
     "minimist": "^1.1.1",
     "tilde-expansion": "0.0.0",
     "underscore": "^1.8.3"

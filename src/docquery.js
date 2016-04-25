@@ -1,7 +1,7 @@
 let fs = require("fs")
 let tilde = require("tilde-expansion")
 let path = require("path")
-let lunr = require("lunr")
+let si = require("search-index")
 let chokidar = require("chokidar")
 let {EventEmitter} = require("events")
 
@@ -13,10 +13,20 @@ class DocQuery extends EventEmitter {
     this.options.persistent  = options.persistent == false ? false : true
     this.options.includeBody = options.includeBody == false ? false : true
     this._documents = {}
-    this.searchIndex = lunr(function() {
-      this.field("title", { boost: 10 })
-      this.field("body")
+    this.searchIndex = si({
+      fieldsToStore: ["fileName", "title", "body"],
+      logLevel: "error"
     })
+    this._batch = []
+    this._batchOptions = {
+      fieldOptions: [
+        {fieldName: "fileName"},
+        {fieldName: "title", weight: 10},
+        {fieldName: "body"},
+      ]
+    }
+    this.loaded = false
+    this.searchResults = null
     this.watcher = chokidar.watch(null, {
       depth: this.options.recursive ? undefined : 0,
       persistent: this.options.persistent,
@@ -33,11 +43,12 @@ class DocQuery extends EventEmitter {
       var body = fs.readFileSync(filePath, {encoding: "utf8"})
 
       return {
+        id: filePath,
         filePath: filePath,
         fileName: fileName,
         title: title,
-        modifiedAt: fileStats.mtime,
-        body: body
+        body: body,
+        modifiedAt: fileStats.mtime.toString()
       }
     }
     this.watcher.on("add", (filePath)=>{
@@ -50,7 +61,7 @@ class DocQuery extends EventEmitter {
       this.removeDocument(this._documents[filePath])
     })
     this.watcher.on("ready", ()=>{
-      this.emit("ready")
+      this.addBatchToSearchIndex()
     })
     tilde(directoryPath, (expandedDirectoryPath)=>{
       this.watcher.add(expandedDirectoryPath)
@@ -59,38 +70,64 @@ class DocQuery extends EventEmitter {
 
   addDocument(fileDetails) {
     this._documents[fileDetails.filePath] = fileDetails
-    this.searchIndex.add({
-      id: fileDetails.filePath,
-      title: fileDetails.title,
-      body: fileDetails.body
+
+    if(this.loaded) {
+      this.searchIndex.add(this._batchOptions, [fileDetails], (err)=>{
+        if(!err) this.emit("added", fileDetails)
+      })
+    } else {
+      this._batch.push(fileDetails)
+    }
+  }
+
+  addBatchToSearchIndex() {
+    var dq = this
+    this.searchIndex.add(this._batch, this._batchOptions, function(err) {
+      if(!err) {
+        dq.loaded = true
+        dq.emit("ready")
+        dq._batch = []
+      }
     })
-    this.emit("added", fileDetails)
   }
 
   updateDocument(fileDetails) {
     this._documents[fileDetails.filePath] = fileDetails
-    this.searchIndex.update({
-      id: fileDetails.filePath,
-      title: fileDetails.title,
-      body: fileDetails.body
+
+    this.searchIndex.add([fileDetails], this._batchOptions, function(err) {
+      if(!err) this.emit("updated", fileDetails)
     })
-    this.emit("updated", fileDetails)
   }
 
   removeDocument(fileDetails) {
-    delete this._documents[fileDetails.filePath]
-    this.searchIndex.remove({
-      id: fileDetails.filePath,
-      title: fileDetails.title,
-      body: fileDetails.body
+    this.searchIndex.del(fileDetails.id, function(err) {
+      if(!err) {
+        delete this._documents[fileDetails.id]
+        this.emit("removed", fileDetails)
+      }
     })
-    this.emit("removed", fileDetails)
   }
 
-  search(query) {
-    return this.searchIndex.search(query).map((result)=>{
-      return this.filterBody(this._documents[result.ref])
+  search(query, callback) {
+    var dq = this
+
+    dq.searchIndex.search({query: {"*":[query]}}, function(err, results) {
+      if(!err) {
+        var docs = []
+
+        results.hits.map(function(result) {
+          return dq._documents[result.id]
+        }).forEach(function(doc) {
+          if(doc) docs.push(doc)
+        })
+
+        callback(docs)
+      }
     })
+  }
+
+  close(callback) {
+    this.searchIndex.close(callback)
   }
 
   filterBody(doc) {
@@ -113,8 +150,8 @@ class DocQuery extends EventEmitter {
     }
 
     return documents.sort((a, b)=>{
-      if(a.modifiedAt < b.modifiedAt) return 1
-      if(a.modifiedAt > b.modifiedAt) return -1
+      if(new Date(a.modifiedAt) < new Date(b.modifiedAt)) return 1
+      if(new Date(a.modifiedAt) > new Date(b.modifiedAt)) return -1
       return 0
     })
   }
