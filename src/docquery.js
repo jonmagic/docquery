@@ -13,10 +13,14 @@ class DocQuery extends EventEmitter {
     this.options.persistent  = options.persistent == false ? false : true
     this.options.includeBody = options.includeBody == false ? false : true
     this._documents = {}
-    this.searchIndex = lunr(function() {
-      this.field("title", { boost: 10 })
-      this.field("body")
-    })
+    if (this.options.searchIndex) {
+      this.searchIndex = lunr.Index.load(this.options.searchIndex)
+    } else {
+      this.searchIndex = lunr(function () {
+        this.field("title", { boost: 10 })
+        this.field("body")
+      });
+    }
     this.watcher = chokidar.watch(null, {
       depth: this.options.recursive ? undefined : 0,
       persistent: this.options.persistent,
