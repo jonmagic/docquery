@@ -30,15 +30,15 @@
     "dq": "lib/cli.js"
   },
   "devDependencies": {
-    "babel": "^5.4.5",
-    "mocha": "^2.2.5",
-    "mocha-sinon": "^1.1.4",
+    "babel": "^5.8.38",
+    "mocha": "^2.5.3",
+    "mocha-sinon": "^1.2.0",
     "mocha-traceur": "^2.1.0",
     "touch": "0.0.3",
     "traceur": "0.0.89"
   },
   "dependencies": {
-    "chokidar": "^1.0.1",
+    "chokidar": "^1.7.0",
     "lunr": "^0.6.0",
     "minimist": "^1.1.1",
     "tilde-expansion": "0.0.0",
