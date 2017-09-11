@@ -118,6 +118,12 @@ src/docquery.js -> lib/docquery.js
   8 passing (3s)
 ```
 
+## Contributors
+
+* [@jonmagic](https://github.com/jonmagic)
+* [@seongjaelee](https://github.com/seongjaelee)
+* [@lexicalunit](https://github.com/lexicalunit)
+
 ## License
 
 The MIT License (MIT)
